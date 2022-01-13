@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Tea } from '@app/models';
 import { IonicModule } from '@ionic/angular';
-
 import { TeaPage } from './tea.page';
 
 describe('TeaPage', () => {

@@ -66,11 +66,11 @@ export class TeaPage implements OnInit {
     },
   ];
 
+  constructor() {}
+
   get teaMatrix(): Array<Array<Tea>> {
     return this.toMatrix(this.teaData);
   }
-
-  constructor() {}
 
   ngOnInit() {}
 
