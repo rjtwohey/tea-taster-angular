@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Tea } from '@app/models';
+import { logout } from '@app/store/actions';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-tea',
@@ -66,13 +68,17 @@ export class TeaPage implements OnInit {
     },
   ];
 
-  constructor() {}
+  constructor(private store: Store) {}
 
   get teaMatrix(): Array<Array<Tea>> {
     return this.toMatrix(this.teaData);
   }
 
   ngOnInit() {}
+
+  logout() {
+    this.store.dispatch(logout());
+  }
 
   private toMatrix(tea: Array<Tea>): Array<Array<Tea>> {
     const matrix: Array<Array<Tea>> = [];

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SessionVaultService } from '@app/core/session-vault/session-vault.service';
 import { Session } from '@app/models';
-import { login, loginFailure, loginSuccess } from '@app/store/actions';
+import { login, loginFailure, loginSuccess, logout, logoutFailure, logoutSuccess } from '@app/store/actions';
 import { NavController } from '@ionic/angular';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { from, of } from 'rxjs';
@@ -31,11 +31,37 @@ export class AuthEffects {
     { dispatch: false }
   );
 
+  logout$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(logout),
+      exhaustMap(() =>
+        from(this.fakeLogout()).pipe(
+          tap(() => this.sessionVault.logout()),
+          map(() => logoutSuccess()),
+          catchError((error) => of(logoutFailure({ errorMessage: error.message })))
+        )
+      )
+    )
+  );
+
+  logoutSuccess$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(logoutSuccess),
+        tap(() => this.navController.navigateRoot(['/', 'login']))
+      ),
+    { dispatch: false }
+  );
+
   constructor(
     private actions$: Actions,
     private navController: NavController,
     private sessionVault: SessionVaultService
   ) {}
+
+  private fakeLogout(): Promise<void> {
+    return Promise.resolve();
+  }
 
   private fakeLogin(email: string, password: string): Promise<Session> {
     return new Promise((resolve, reject) =>
