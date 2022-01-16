@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { AuthGuardService } from '@app/core';
 
 const routes: Routes = [
   {
@@ -10,6 +11,7 @@ const routes: Routes = [
   {
     path: 'tea',
     loadChildren: () => import('./tea/tea.module').then((m) => m.TeaPageModule),
+    canActivate: [AuthGuardService],
   },
   {
     path: 'login',
