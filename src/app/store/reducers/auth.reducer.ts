@@ -68,5 +68,9 @@ export const reducer = createReducer(
       ...state,
       session,
     })
-  )
+  ),
+  on(Actions.unauthError, (state): AuthState => {
+    const { session, ...newState } = state;
+    return newState;
+  })
 );

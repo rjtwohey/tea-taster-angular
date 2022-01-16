@@ -1,10 +1,18 @@
 import { Injectable } from '@angular/core';
+import { AuthenticationService } from '@app/core';
 import { SessionVaultService } from '@app/core/session-vault/session-vault.service';
-import { Session } from '@app/models';
-import { login, loginFailure, loginSuccess, logout, logoutFailure, logoutSuccess } from '@app/store/actions';
+import {
+  login,
+  loginFailure,
+  loginSuccess,
+  logout,
+  logoutFailure,
+  logoutSuccess,
+  unauthError,
+} from '@app/store/actions';
 import { NavController } from '@ionic/angular';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { from, of } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError, exhaustMap, map, tap } from 'rxjs/operators';
 
 @Injectable()
@@ -13,10 +21,20 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(login),
       exhaustMap((action) =>
-        from(this.fakeLogin(action.email, action.password)).pipe(
-          tap((session) => this.sessionVault.login(session)),
-          map((session) => loginSuccess({ session })),
-          catchError((error) => of(loginFailure({ errorMessage: error.message })))
+        this.auth.login(action.email, action.password).pipe(
+          tap((session) => {
+            if (session) {
+              this.sessionVault.login(session);
+            }
+          }),
+          map((session) => {
+            if (session) {
+              return loginSuccess({ session });
+            } else {
+              return loginFailure({ errorMessage: 'Invalid Username or Password' });
+            }
+          }),
+          catchError((error) => of(loginFailure({ errorMessage: 'Unknown error in login' })))
         )
       )
     )
@@ -35,10 +53,10 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(logout),
       exhaustMap(() =>
-        from(this.fakeLogout()).pipe(
+        this.auth.logout().pipe(
           tap(() => this.sessionVault.logout()),
           map(() => logoutSuccess()),
-          catchError((error) => of(logoutFailure({ errorMessage: error.message })))
+          catchError((error) => of(logoutFailure({ errorMessage: 'Unknown error in logout' })))
         )
       )
     )
@@ -53,28 +71,20 @@ export class AuthEffects {
     { dispatch: false }
   );
 
+  unauthError$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(unauthError),
+      tap(() => {
+        this.sessionVault.logout();
+      }),
+      map(() => logoutSuccess())
+    )
+  );
+
   constructor(
     private actions$: Actions,
+    private auth: AuthenticationService,
     private navController: NavController,
     private sessionVault: SessionVaultService
   ) {}
-
-  private fakeLogout(): Promise<void> {
-    return Promise.resolve();
-  }
-
-  private fakeLogin(email: string, password: string): Promise<Session> {
-    return new Promise((resolve, reject) =>
-      setTimeout(() => {
-        if (password === 'test') {
-          resolve({
-            user: { id: 73, firstName: 'Ken', lastName: 'Sodemann', email },
-            token: '314159',
-          });
-        } else {
-          reject(new Error('Invalid Username or Password'));
-        }
-      })
-    );
-  }
 }

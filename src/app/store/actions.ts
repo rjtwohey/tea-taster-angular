@@ -10,3 +10,5 @@ export const logoutSuccess = createAction('[Auth API] logout success');
 export const logoutFailure = createAction('[Auth API] logout failure', props<{ errorMessage: string }>());
 
 export const sessionRestored = createAction('[Vault API] session restored', props<{ session: Session }>());
+
+export const unauthError = createAction('[Auth API] unauthenticated error');
