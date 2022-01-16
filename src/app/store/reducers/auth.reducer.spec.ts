@@ -1,5 +1,13 @@
 import { initialState, reducer } from './auth.reducer';
-import { login, loginFailure, loginSuccess, logout, logoutFailure, logoutSuccess } from '@app/store/actions';
+import {
+  login,
+  loginFailure,
+  loginSuccess,
+  logout,
+  logoutFailure,
+  logoutSuccess,
+  sessionRestored,
+} from '@app/store/actions';
 import { Session } from '@app/models';
 
 it('returns the default state', () => {
@@ -111,6 +119,26 @@ describe('logout actions', () => {
         loading: false,
         errorMessage: 'There was a failure, it was a mess',
       });
+    });
+  });
+});
+
+describe('Session Restored', () => {
+  it('sets the session', () => {
+    const session: Session = {
+      user: {
+        id: 42,
+        firstName: 'Douglas',
+        lastName: 'Adams',
+        email: 'solong@thanksforthefish.com',
+      },
+      token: 'Imalittletoken',
+    };
+    const action = sessionRestored({ session });
+    expect(reducer({ loading: false, errorMessage: '' }, action)).toEqual({
+      session,
+      loading: false,
+      errorMessage: '',
     });
   });
 });

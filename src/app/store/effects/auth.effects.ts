@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { SessionVaultService } from '@app/core/session-vault/session-vault.service';
 import { Session } from '@app/models';
 import { login, loginFailure, loginSuccess } from '@app/store/actions';
 import { NavController } from '@ionic/angular';
@@ -13,6 +14,7 @@ export class AuthEffects {
       ofType(login),
       exhaustMap((action) =>
         from(this.fakeLogin(action.email, action.password)).pipe(
+          tap((session) => this.sessionVault.login(session)),
           map((session) => loginSuccess({ session })),
           catchError((error) => of(loginFailure({ errorMessage: error.message })))
         )
@@ -29,7 +31,11 @@ export class AuthEffects {
     { dispatch: false }
   );
 
-  constructor(private actions$: Actions, private navController: NavController) {}
+  constructor(
+    private actions$: Actions,
+    private navController: NavController,
+    private sessionVault: SessionVaultService
+  ) {}
 
   private fakeLogin(email: string, password: string): Promise<Session> {
     return new Promise((resolve, reject) =>
