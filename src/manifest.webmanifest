@@ -1,5 +1,11 @@
 {
+  "name": "Tea Taster",
+  "short_name": "TeaTaster",
+  "theme_color": "#1976d2",
   "background_color": "#f1ebe1",
+  "display": "standalone",
+  "scope": "./",
+  "start_url": "./",
   "icons": [
     {
       "src": "icons/icon-192.webp",
