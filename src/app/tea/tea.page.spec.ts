@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Tea } from '@app/models';
 import { selectTeas } from '@app/store';
-import { logout } from '@app/store/actions';
 import { AuthState, initialState as initialAuthState } from '@app/store/reducers/auth.reducer';
 import { DataState, initialState as initialDataState } from '@app/store/reducers/data.reducer';
 import { IonicModule, NavController } from '@ionic/angular';
@@ -112,17 +111,6 @@ describe('TeaPage', () => {
       const navController = TestBed.inject(NavController);
       click(card);
       expect(navController.navigateForward).toHaveBeenCalledWith(['tabs', 'tea', 'tea-details', teas[2].id]);
-    });
-  });
-
-  describe('logout button', () => {
-    it('dispatches the logout button', () => {
-      const button = fixture.debugElement.query(By.css('[data-testid="logout-button"]'));
-      const store = TestBed.inject(Store);
-      spyOn(store, 'dispatch');
-      click(button.nativeElement);
-      expect(store.dispatch).toHaveBeenCalledTimes(1);
-      expect(store.dispatch).toHaveBeenCalledWith(logout());
     });
   });
 
