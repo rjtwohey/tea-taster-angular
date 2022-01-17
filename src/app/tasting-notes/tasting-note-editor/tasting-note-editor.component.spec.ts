@@ -5,10 +5,11 @@ import { SharedModule } from '@app/shared';
 import { selectTeas } from '@app/store';
 import { noteSaved } from '@app/store/actions';
 import { DataState, initialState } from '@app/store/reducers/data.reducer';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { Share } from '@capacitor/share';
+import { IonicModule, ModalController, Platform } from '@ionic/angular';
 import { Store } from '@ngrx/store';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { createOverlayControllerMock } from '@test/mocks';
+import { createOverlayControllerMock, createPlatformMock } from '@test/mocks';
 import { TastingNoteEditorComponent } from './tasting-note-editor.component';
 
 describe('TastingNoteEditorComponent', () => {
@@ -27,6 +28,10 @@ describe('TastingNoteEditorComponent', () => {
           {
             provide: ModalController,
             useFactory: () => createOverlayControllerMock('ModalController'),
+          },
+          {
+            provide: Platform,
+            useFactory: createPlatformMock,
           },
         ],
       }).compileComponents();
@@ -211,6 +216,70 @@ describe('TastingNoteEditorComponent', () => {
       const modalController = TestBed.inject(ModalController);
       component.close();
       expect(modalController.dismiss).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('share', () => {
+    describe('in a web context', () => {
+      beforeEach(() => {
+        const platform = TestBed.inject(Platform);
+        (platform.is as any).withArgs('hybrid').and.returnValue(false);
+        fixture.detectChanges();
+      });
+
+      it('is not available', () => {
+        expect(fixture.debugElement.query(By.css('#share-button'))).toBeFalsy();
+      });
+    });
+
+    describe('in a mobile context', () => {
+      beforeEach(() => {
+        const platform = TestBed.inject(Platform);
+        (platform.is as any).withArgs('hybrid').and.returnValue(true);
+        fixture.detectChanges();
+      });
+
+      it('is available', () => {
+        expect(fixture.debugElement.query(By.css('#share-button'))).toBeTruthy();
+      });
+
+      it('is not allowed until a brand, name, and rating have all been entered', () => {
+        const button = fixture.debugElement.query(By.css('#share-button'));
+        expect(button.nativeElement.disabled).toBeTrue();
+
+        component.brand = 'Lipton';
+        fixture.detectChanges();
+        expect(button.nativeElement.disabled).toBeTrue();
+
+        component.name = 'Yellow Label';
+        fixture.detectChanges();
+        expect(button.nativeElement.disabled).toBeTrue();
+
+        component.rating = 2;
+        fixture.detectChanges();
+        expect(button.nativeElement.disabled).toBeFalse();
+      });
+
+      it('calls the share plugin when clicked', async () => {
+        spyOn(Share, 'share');
+        const button = fixture.debugElement.query(By.css('#share-button'));
+
+        component.brand = 'Lipton';
+        component.name = 'Yellow Label';
+        component.rating = 2;
+
+        const event = new Event('click');
+        button.nativeElement.dispatchEvent(event);
+        fixture.detectChanges();
+
+        expect(Share.share).toHaveBeenCalledTimes(1);
+        expect(Share.share).toHaveBeenCalledWith({
+          title: 'Lipton: Yellow Label',
+          text: 'I gave Lipton: Yellow Label 2 stars on the Tea Taster app',
+          dialogTitle: 'Share your tasting note',
+          url: 'https://tea-taster-training.web.app',
+        });
+      });
     });
   });
 });
