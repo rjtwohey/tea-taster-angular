@@ -1,25 +1,29 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { AuthGuardService } from '@app/core';
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'tea',
+    redirectTo: 'tabs',
     pathMatch: 'full',
-  },
-  {
-    path: 'tea',
-    loadChildren: () => import('./tea/tea.module').then((m) => m.TeaPageModule),
-    canActivate: [AuthGuardService],
   },
   {
     path: 'login',
     loadChildren: () => import('./login/login.module').then((m) => m.LoginPageModule),
   },
   {
-    path: 'tea-details',
-    loadChildren: () => import('./tea-details/tea-details.module').then((m) => m.TeaDetailsPageModule),
+    path: 'tabs',
+    loadChildren: () => import('./tabs/tabs.module').then((m) => m.TabsPageModule),
+  },
+  {
+    path: '',
+    redirectTo: 'tabs/tea',
+    pathMatch: 'full',
+  },
+  {
+    path: 'tabs',
+    redirectTo: 'tabs/tea',
+    pathMatch: 'full',
   },
 ];
 

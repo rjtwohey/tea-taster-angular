@@ -111,7 +111,7 @@ describe('TeaPage', () => {
     it('passes the details page and the ID', () => {
       const navController = TestBed.inject(NavController);
       click(card);
-      expect(navController.navigateForward).toHaveBeenCalledWith(['tea-details', teas[2].id]);
+      expect(navController.navigateForward).toHaveBeenCalledWith(['tabs', 'tea', 'tea-details', teas[2].id]);
     });
   });
 
