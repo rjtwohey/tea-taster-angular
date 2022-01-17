@@ -6,9 +6,10 @@ import { selectTeas } from '@app/store';
 import { logout } from '@app/store/actions';
 import { AuthState, initialState as initialAuthState } from '@app/store/reducers/auth.reducer';
 import { DataState, initialState as initialDataState } from '@app/store/reducers/data.reducer';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, NavController } from '@ionic/angular';
 import { Store } from '@ngrx/store';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { createNavControllerMock } from '@test/mocks';
 import { TeaPage } from './tea.page';
 
 describe('TeaPage', () => {
@@ -26,6 +27,7 @@ describe('TeaPage', () => {
           provideMockStore<{ auth: AuthState; data: DataState }>({
             initialState: { auth: initialAuthState, data: initialDataState },
           }),
+          { provide: NavController, useFactory: createNavControllerMock },
         ],
       }).compileComponents();
 
@@ -88,6 +90,28 @@ describe('TeaPage', () => {
         const title = col.query(By.css('ion-card-content'));
         expect(title.nativeElement.textContent.trim()).toBe(teas[idx].description);
       });
+    });
+  });
+
+  describe('show details page', () => {
+    let card: HTMLElement;
+    beforeEach(() => {
+      const grid = fixture.debugElement.query(By.css('ion-grid'));
+      const rows = grid.queryAll(By.css('ion-row'));
+      const cols = rows[0].queryAll(By.css('ion-col'));
+      card = cols[2].query(By.css('ion-card')).nativeElement;
+    });
+
+    it('navigates forward', () => {
+      const navController = TestBed.inject(NavController);
+      click(card);
+      expect(navController.navigateForward).toHaveBeenCalledTimes(1);
+    });
+
+    it('passes the details page and the ID', () => {
+      const navController = TestBed.inject(NavController);
+      click(card);
+      expect(navController.navigateForward).toHaveBeenCalledWith(['tea-details', teas[2].id]);
     });
   });
 

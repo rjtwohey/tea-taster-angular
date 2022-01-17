@@ -23,4 +23,6 @@ const toMatrix = (tea: Array<Tea>): Array<Array<Tea>> => {
 
 export const selectData = (state: State) => state.data;
 export const selectTeas = createSelector(selectData, (state: DataState) => state.teas);
+export const selectTea = (id: number) =>
+  createSelector(selectTeas, (teas: Array<Tea>) => teas.find((t) => t.id === id));
 export const selectTeasMatrix = createSelector(selectTeas, (teas: Array<Tea>) => toMatrix(teas));
