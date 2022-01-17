@@ -4,7 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 import { AuthInterceptor, UnauthInterceptor } from '@app/core';
 import { metaReducers, reducers } from '@app/store';
-import { AuthEffects } from '@app/store/effects';
+import { AuthEffects, DataEffects } from '@app/store/effects';
 import { environment } from '@env/environment';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { EffectsModule } from '@ngrx/effects';
@@ -28,7 +28,7 @@ import { AppComponent } from './app.component';
         strictActionImmutability: true,
       },
     }),
-    EffectsModule.forRoot([AuthEffects]),
+    EffectsModule.forRoot([AuthEffects, DataEffects]),
     StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: environment.production, autoPause: true }),
   ],
   providers: [
