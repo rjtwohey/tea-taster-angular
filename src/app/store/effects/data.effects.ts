@@ -1,9 +1,18 @@
 import { Injectable } from '@angular/core';
-import { TeaService } from '@app/core';
+import { TastingNotesService, TeaService } from '@app/core';
 import {
   initialLoadFailure,
   initialLoadSuccess,
   loginSuccess,
+  noteDeleted,
+  noteDeletedFailure,
+  noteDeletedSuccess,
+  noteSaved,
+  noteSavedFailure,
+  noteSavedSuccess,
+  notesPageLoaded,
+  notesPageLoadedFailure,
+  notesPageLoadedSuccess,
   sessionRestored,
   teaDetailsChangeRating,
   teaDetailsChangeRatingFailure,
@@ -55,5 +64,63 @@ export class DataEffects {
     )
   );
 
-  constructor(private actions$: Actions, private teaService: TeaService) {}
+  notesPageLoaded$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(notesPageLoaded),
+      mergeMap(() =>
+        this.tastingNotesService.getAll().pipe(
+          map((notes) => notesPageLoadedSuccess({ notes })),
+          catchError(() =>
+            of(
+              notesPageLoadedFailure({
+                errorMessage: 'Error in data load, check server logs',
+              })
+            )
+          )
+        )
+      )
+    )
+  );
+
+  noteSaved$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(noteSaved),
+      mergeMap((action) =>
+        this.tastingNotesService.save(action.note).pipe(
+          map((note) => noteSavedSuccess({ note })),
+          catchError(() =>
+            of(
+              noteSavedFailure({
+                errorMessage: 'Error in data load, check server logs',
+              })
+            )
+          )
+        )
+      )
+    )
+  );
+
+  noteDeleted$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(noteDeleted),
+      mergeMap((action) =>
+        this.tastingNotesService.delete(action.note.id).pipe(
+          map(() => noteDeletedSuccess({ note: action.note })),
+          catchError(() =>
+            of(
+              noteDeletedFailure({
+                errorMessage: 'Error in data load, check server logs',
+              })
+            )
+          )
+        )
+      )
+    )
+  );
+
+  constructor(
+    private actions$: Actions,
+    private tastingNotesService: TastingNotesService,
+    private teaService: TeaService
+  ) {}
 }

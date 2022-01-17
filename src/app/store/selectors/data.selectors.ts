@@ -1,7 +1,7 @@
 import { createSelector } from '@ngrx/store';
 import { State } from '@app/store';
 import { DataState } from '@app/store/reducers/data.reducer';
-import { Tea } from '@app/models';
+import { TastingNote, Tea } from '@app/models';
 
 const toMatrix = (tea: Array<Tea>): Array<Array<Tea>> => {
   const matrix: Array<Array<Tea>> = [];
@@ -26,3 +26,7 @@ export const selectTeas = createSelector(selectData, (state: DataState) => state
 export const selectTea = (id: number) =>
   createSelector(selectTeas, (teas: Array<Tea>) => teas.find((t) => t.id === id));
 export const selectTeasMatrix = createSelector(selectTeas, (teas: Array<Tea>) => toMatrix(teas));
+
+export const selectNotes = createSelector(selectData, (state: DataState) => state.notes);
+export const selectNote = (id: number) =>
+  createSelector(selectNotes, (notes: Array<TastingNote>) => notes.find((t) => t.id === id));
