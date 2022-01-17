@@ -1,8 +1,8 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Tea } from '@app/models';
+import { Storage } from '@capacitor/storage';
 import { environment } from '@env/environment';
-
 import { TeaService } from './tea.service';
 
 describe('TeaService', () => {
@@ -12,12 +12,22 @@ describe('TeaService', () => {
   let service: TeaService;
 
   beforeEach(() => {
+    initializeTestData();
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
     });
     httpTestingController = TestBed.inject(HttpTestingController);
     service = TestBed.inject(TeaService);
-    initializeTestData();
+    spyOn(Storage, 'get')
+      .and.returnValue(Promise.resolve({ value: '0' }))
+      .withArgs({ key: 'rating1' })
+      .and.returnValue(Promise.resolve({ value: '4' }))
+      .withArgs({ key: 'rating2' })
+      .and.returnValue(Promise.resolve({ value: '1' }))
+      .withArgs({ key: 'rating4' })
+      .and.returnValue(Promise.resolve({ value: '3' }))
+      .withArgs({ key: 'rating6' })
+      .and.returnValue(Promise.resolve({ value: '5' }));
   });
 
   it('should be created', () => {
@@ -32,13 +42,28 @@ describe('TeaService', () => {
       httpTestingController.verify();
     });
 
-    it('adds an image to each', () => {
+    it('transforms each tea', fakeAsync(() => {
       let teas: Array<Tea>;
       service.getAll().subscribe((t) => (teas = t));
       const req = httpTestingController.expectOne(`${environment.dataService}/tea-categories`);
       req.flush(resultTeas);
+      tick();
       httpTestingController.verify();
       expect(teas).toEqual(expectedTeas);
+    }));
+  });
+
+  describe('save', () => {
+    it('saves the value', () => {
+      spyOn(Storage, 'set');
+      const tea = { ...expectedTeas[4] };
+      tea.rating = 4;
+      service.save(tea);
+      expect(Storage.set).toHaveBeenCalledTimes(1);
+      expect(Storage.set).toHaveBeenCalledWith({
+        key: 'rating5',
+        value: '4',
+      });
     });
   });
 
@@ -49,52 +74,60 @@ describe('TeaService', () => {
         name: 'Green',
         image: 'assets/img/green.jpg',
         description: 'Green tea description.',
+        rating: 4,
       },
       {
         id: 2,
         name: 'Black',
         image: 'assets/img/black.jpg',
         description: 'Black tea description.',
+        rating: 1,
       },
       {
         id: 3,
         name: 'Herbal',
         image: 'assets/img/herbal.jpg',
         description: 'Herbal Infusion description.',
+        rating: 0,
       },
       {
         id: 4,
         name: 'Oolong',
         image: 'assets/img/oolong.jpg',
         description: 'Oolong tea description.',
+        rating: 3,
       },
       {
         id: 5,
         name: 'Dark',
         image: 'assets/img/dark.jpg',
         description: 'Dark tea description.',
+        rating: 0,
       },
       {
         id: 6,
         name: 'Puer',
         image: 'assets/img/puer.jpg',
         description: 'Puer tea description.',
+        rating: 5,
       },
       {
         id: 7,
         name: 'White',
         image: 'assets/img/white.jpg',
         description: 'White tea description.',
+        rating: 0,
       },
       {
         id: 8,
         name: 'Yellow',
         image: 'assets/img/yellow.jpg',
         description: 'Yellow tea description.',
+        rating: 0,
       },
     ];
     resultTeas = expectedTeas.map((t: Tea) => {
-      const { image, ...tea } = t;
+      const { image, rating, ...tea } = t;
       return tea;
     });
   };

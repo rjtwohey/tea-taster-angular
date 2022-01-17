@@ -4,7 +4,7 @@ import { createTeaServiceMock } from '@app/core/testing';
 import { Session, Tea } from '@app/models';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Observable, of, throwError } from 'rxjs';
-import { loginSuccess, sessionRestored } from '@app/store/actions';
+import { loginSuccess, sessionRestored, teaDetailsChangeRating } from '@app/store/actions';
 import { DataEffects } from './data.effects';
 
 describe('DataEffects', () => {
@@ -27,18 +27,21 @@ describe('DataEffects', () => {
       name: 'Green',
       image: 'assets/img/green.jpg',
       description: 'Green teas are green',
+      rating: 1,
     },
     {
       id: 2,
       name: 'Black',
       image: 'assets/img/black.jpg',
       description: 'Black teas are not green',
+      rating: 1,
     },
     {
       id: 3,
       name: 'Herbal',
       image: 'assets/img/herbal.jpg',
       description: 'Herbal teas are not even tea',
+      rating: 3,
     },
   ];
 
@@ -109,4 +112,47 @@ describe('DataEffects', () => {
       });
     })
   );
+
+  describe('teaRatingChanged$', () => {
+    it('saves the tea', (done) => {
+      const teaService = TestBed.inject(TeaService);
+      actions$ = of(teaDetailsChangeRating({ tea: teas[1], rating: 5 }));
+      effects.teaRatingChanged$.subscribe(() => {
+        expect(teaService.save).toHaveBeenCalledTimes(1);
+        expect(teaService.save).toHaveBeenCalledWith({ ...teas[1], rating: 5 });
+        done();
+      });
+    });
+
+    describe('on success', () => {
+      it('dispatches tea rating change success', (done) => {
+        actions$ = of(teaDetailsChangeRating({ tea: teas[1], rating: 5 }));
+        effects.teaRatingChanged$.subscribe((newAction) => {
+          expect(newAction).toEqual({
+            type: '[Data API] change rating success',
+            tea: { ...teas[1], rating: 5 },
+          });
+          done();
+        });
+      });
+    });
+
+    describe('on an exception', () => {
+      beforeEach(() => {
+        const teaService = TestBed.inject(TeaService);
+        (teaService.save as any).and.returnValue(Promise.reject(new Error('private storage is blowing chunks?')));
+      });
+
+      it('dispatches tea rating change failure', (done) => {
+        actions$ = of(teaDetailsChangeRating({ tea: teas[1], rating: 5 }));
+        effects.teaRatingChanged$.subscribe((newAction) => {
+          expect(newAction).toEqual({
+            type: '[Data API] change rating failure',
+            errorMessage: 'private storage is blowing chunks?',
+          });
+          done();
+        });
+      });
+    });
+  });
 });

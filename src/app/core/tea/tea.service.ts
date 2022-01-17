@@ -2,8 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Tea } from '@app/models';
 import { environment } from '@env/environment';
-import { EMPTY, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
+import { Storage } from '@capacitor/storage';
 
 @Injectable({
   providedIn: 'root',
@@ -16,13 +17,22 @@ export class TeaService {
   getAll(): Observable<Array<Tea>> {
     return this.http
       .get(`${environment.dataService}/tea-categories`)
-      .pipe(map((teas: Array<any>) => teas.map((t) => this.convert(t))));
+      .pipe(mergeMap((teas: Array<any>) => Promise.all(teas.map((t) => this.convert(t)))));
   }
 
-  private convert(t: any): Tea {
+  save(tea: Tea): Promise<void> {
+    return Storage.set({
+      key: `rating${tea.id}`,
+      value: tea.rating.toString(),
+    });
+  }
+
+  private async convert(t: any): Promise<Tea> {
+    const { value } = await Storage.get({ key: `rating${t.id}` });
     return {
       ...t,
       image: `assets/img/${this.images[t.id - 1]}.jpg`,
+      rating: parseInt(value || '0', 10),
     };
   }
 }

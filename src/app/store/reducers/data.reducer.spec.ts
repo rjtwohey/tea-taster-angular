@@ -5,6 +5,8 @@ import {
   loginSuccess,
   logoutSuccess,
   sessionRestored,
+  teaDetailsChangeRatingFailure,
+  teaDetailsChangeRatingSuccess,
 } from '@app/store/actions';
 import { DataState, initialState, reducer } from './data.reducer';
 
@@ -24,18 +26,21 @@ const teas: Array<Tea> = [
     name: 'Green',
     image: 'assets/img/green.jpg',
     description: 'Green teas are green',
+    rating: 5,
   },
   {
     id: 2,
     name: 'Black',
     image: 'assets/img/black.jpg',
     description: 'Black teas are not green',
+    rating: 1,
   },
   {
     id: 3,
     name: 'Herbal',
     image: 'assets/img/herbal.jpg',
     description: 'Herbal teas are not even tea',
+    rating: 4,
   },
 ];
 
@@ -78,6 +83,18 @@ it('returns the default state', () => {
     action: logoutSuccess(),
     begin: { teas },
     end: {},
+  },
+  {
+    description: 'Tea Details Change Rating Success: sets the rating for the tea',
+    action: teaDetailsChangeRatingSuccess({ tea: { ...teas[1], rating: 3 } }),
+    begin: { teas },
+    end: { teas: [teas[0], { ...teas[1], rating: 3 }, teas[2]] },
+  },
+  {
+    description: 'Tea Details Change Rating Failure: sets the error message',
+    action: teaDetailsChangeRatingFailure({ errorMessage: 'The save blew some chunks' }),
+    begin: { teas },
+    end: { teas, errorMessage: 'The save blew some chunks' },
   },
 ].forEach((test) =>
   it(test.description, () => {
