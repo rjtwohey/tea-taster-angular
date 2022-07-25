@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Session } from '@app/models';
 import { sessionRestored } from '@app/store/actions';
-import { Storage } from '@capacitor/storage';
+import { Preferences } from '@capacitor/preferences';
 import { Store } from '@ngrx/store';
 import { provideMockStore } from '@ngrx/store/testing';
 import { SessionVaultService } from './session-vault.service';
@@ -22,7 +22,7 @@ describe('SessionVaultService', () => {
 
   describe('login', () => {
     it('saves the session in storage', async () => {
-      spyOn(Storage, 'set');
+      spyOn(Preferences, 'set');
       const session: Session = {
         user: {
           id: 42,
@@ -33,8 +33,8 @@ describe('SessionVaultService', () => {
         token: '19940059fkkf039',
       };
       await service.login(session);
-      expect(Storage.set).toHaveBeenCalledTimes(1);
-      expect(Storage.set).toHaveBeenCalledWith({
+      expect(Preferences.set).toHaveBeenCalledTimes(1);
+      expect(Preferences.set).toHaveBeenCalledWith({
         key: 'auth-session',
         value: JSON.stringify(session),
       });
@@ -43,10 +43,10 @@ describe('SessionVaultService', () => {
 
   describe('restoreSession', () => {
     it('gets the session from storage', async () => {
-      spyOn(Storage, 'get').and.returnValue(Promise.resolve({ value: null }));
+      spyOn(Preferences, 'get').and.returnValue(Promise.resolve({ value: null }));
       await service.restoreSession();
-      expect(Storage.get).toHaveBeenCalledTimes(1);
-      expect(Storage.get).toHaveBeenCalledWith({
+      expect(Preferences.get).toHaveBeenCalledTimes(1);
+      expect(Preferences.get).toHaveBeenCalledWith({
         key: 'auth-session',
       });
     });
@@ -62,7 +62,7 @@ describe('SessionVaultService', () => {
         token: '19940059fkkf039',
       };
       beforeEach(() => {
-        spyOn(Storage, 'get').and.returnValue(Promise.resolve({ value: JSON.stringify(session) }));
+        spyOn(Preferences, 'get').and.returnValue(Promise.resolve({ value: JSON.stringify(session) }));
       });
 
       it('resolves the session', async () => {
@@ -80,7 +80,7 @@ describe('SessionVaultService', () => {
 
     describe('without a session', () => {
       beforeEach(() => {
-        spyOn(Storage, 'get').and.returnValue(Promise.resolve({ value: null }));
+        spyOn(Preferences, 'get').and.returnValue(Promise.resolve({ value: null }));
       });
 
       it('resolves null', async () => {
@@ -98,10 +98,10 @@ describe('SessionVaultService', () => {
 
   describe('logout', () => {
     it('clears the storage', async () => {
-      spyOn(Storage, 'remove');
+      spyOn(Preferences, 'remove');
       await service.logout();
-      expect(Storage.remove).toHaveBeenCalledTimes(1);
-      expect(Storage.remove).toHaveBeenCalledWith({
+      expect(Preferences.remove).toHaveBeenCalledTimes(1);
+      expect(Preferences.remove).toHaveBeenCalledWith({
         key: 'auth-session',
       });
     });

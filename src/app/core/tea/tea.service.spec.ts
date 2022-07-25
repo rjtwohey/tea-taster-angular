@@ -1,7 +1,7 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Tea } from '@app/models';
-import { Storage } from '@capacitor/storage';
+import { Preferences } from '@capacitor/preferences';
 import { environment } from '@env/environment';
 import { TeaService } from './tea.service';
 
@@ -18,7 +18,7 @@ describe('TeaService', () => {
     });
     httpTestingController = TestBed.inject(HttpTestingController);
     service = TestBed.inject(TeaService);
-    spyOn(Storage, 'get')
+    spyOn(Preferences, 'get')
       .and.returnValue(Promise.resolve({ value: '0' }))
       .withArgs({ key: 'rating1' })
       .and.returnValue(Promise.resolve({ value: '4' }))
@@ -55,12 +55,12 @@ describe('TeaService', () => {
 
   describe('save', () => {
     it('saves the value', () => {
-      spyOn(Storage, 'set');
+      spyOn(Preferences, 'set');
       const tea = { ...expectedTeas[4] };
       tea.rating = 4;
       service.save(tea);
-      expect(Storage.set).toHaveBeenCalledTimes(1);
-      expect(Storage.set).toHaveBeenCalledWith({
+      expect(Preferences.set).toHaveBeenCalledTimes(1);
+      expect(Preferences.set).toHaveBeenCalledWith({
         key: 'rating5',
         value: '4',
       });

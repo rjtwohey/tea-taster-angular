@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Session } from '@app/models';
 import { sessionRestored } from '@app/store/actions';
-import { Storage } from '@capacitor/storage';
+import { Preferences } from '@capacitor/preferences';
 import { Store } from '@ngrx/store';
 
 @Injectable({
@@ -13,11 +13,11 @@ export class SessionVaultService {
   constructor(private store: Store) {}
 
   async login(session: Session): Promise<void> {
-    await Storage.set({ key: this.key, value: JSON.stringify(session) });
+    await Preferences.set({ key: this.key, value: JSON.stringify(session) });
   }
 
   async restoreSession(): Promise<Session> {
-    const { value } = await Storage.get({ key: this.key });
+    const { value } = await Preferences.get({ key: this.key });
     const session = JSON.parse(value);
 
     if (session) {
@@ -28,6 +28,6 @@ export class SessionVaultService {
   }
 
   async logout(): Promise<void> {
-    return Storage.remove({ key: this.key });
+    return Preferences.remove({ key: this.key });
   }
 }
