@@ -8,6 +8,7 @@ import {
   IdentityVaultConfig,
   Vault,
   VaultType,
+  VaultError,
 } from '@ionic-enterprise/identity-vault';
 import { ModalController } from '@ionic/angular';
 import { Store } from '@ngrx/store';
@@ -43,6 +44,10 @@ export class SessionVaultService {
     this.vault.onPasscodeRequested(async (isPasscodeSetRequest: boolean) =>
       this.onPasscodeRequest(isPasscodeSetRequest)
     );
+
+    this.vault.onError((err) => {
+      this.onError(err);
+    });
   }
 
   async login(session: Session, unlockMode: UnlockMode): Promise<void> {
@@ -80,6 +85,21 @@ export class SessionVaultService {
       component: PinDialogComponent,
       componentProps: {
         setPasscodeMode: isPasscodeSetRequest,
+      },
+    });
+    dlg.present();
+    const { data } = await dlg.onDidDismiss();
+    this.vault.setCustomPasscode(data || '');
+  }
+
+  private async onError(err: VaultError): Promise<void> {
+    console.log('ERROR from callback', JSON.stringify(err));
+    const dlg = await this.modalController.create({
+      backdropDismiss: false,
+      component: PinDialogComponent,
+      componentProps: {
+        setPasscodeMode: false,
+        error: true,
       },
     });
     dlg.present();

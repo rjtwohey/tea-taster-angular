@@ -8,6 +8,7 @@ import { ModalController } from '@ionic/angular';
 })
 export class PinDialogComponent implements OnInit {
   @Input() setPasscodeMode: boolean;
+  @Input() error: null | boolean;
 
   displayPin: string;
   errorMessage: string;
@@ -36,6 +37,10 @@ export class PinDialogComponent implements OnInit {
       this.initSetPasscodeMode();
     } else {
       this.initUnlockMode();
+    }
+
+    if (this.error) {
+      this.errorMessage = 'Invalid Passcode';
     }
   }
 
